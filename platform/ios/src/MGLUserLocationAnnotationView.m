@@ -53,7 +53,7 @@ const CGFloat MGLUserLocationAnnotationArrowSize = MGLUserLocationAnnotationPuck
         self.annotation = [[MGLUserLocation alloc] initWithMapView:mapView];
         _mapView = mapView;
         [self setupLayers];
-        self.accessibilityLabel = @"User location";
+        self.accessibilityTraits = UIAccessibilityTraitButton;
     }
     return self;
 }
@@ -62,6 +62,49 @@ const CGFloat MGLUserLocationAnnotationArrowSize = MGLUserLocationAnnotationPuck
 {
     MGLMapView *mapView = [decoder valueForKey:@"mapView"];
     return [self initInMapView:mapView];
+}
+
+- (NSString *)accessibilityLabel
+{
+    return self.annotation.title;
+}
+
+- (NSString *)accessibilityValue
+{
+    if (self.annotation.subtitle)
+    {
+        return self.annotation.subtitle;
+    }
+    
+    CLLocationCoordinate2D centerCoordinate = self.mapView.centerCoordinate;
+    CLLocationDegrees latDeg = fabs(centerCoordinate.latitude);
+    NSString *latDir = centerCoordinate.latitude > 0 ? @"north" : @"south";
+    CLLocationDegrees lonDeg = fabs(centerCoordinate.longitude);
+    NSString *lonDir = centerCoordinate.longitude > 0 ? @"east" : @"west";
+    
+    if (self.mapView.zoomLevel > 8) {
+        // Each arcsecond is about 30 m, too small for even high zoom levels.
+        CLLocationDegrees latMin = round(fmod(latDeg, 1) * 60);
+        CLLocationDegrees lonMin = round(fmod(lonDeg, 1) * 60);
+        return [NSString stringWithFormat:
+                @"%i degree%@ %i minute%@ %@, and %i degree%@ %i minute%@ %@",
+                (int)latDeg, latDeg == 1 ? @"" : @"s",
+                (int)latMin, latMin == 1 ? @"" : @"s", latDir,
+                (int)lonDeg, lonDeg == 1 ? @"" : @"s",
+                (int)lonMin, lonMin == 1 ? @"" : @"s", lonDir];
+    } else {
+        // Each arcminute is about 1 nmi, too small for low zoom levels.
+        latDeg = round(latDeg);
+        lonDeg = round(lonDeg);
+        return [NSString stringWithFormat:@"%i degree%@ %@ and %i degree%@ %@",
+                (int)latDeg, latDeg == 1 ? @"" : @"s", latDir,
+                (int)lonDeg, lonDeg == 1 ? @"" : @"s", lonDir];
+    }
+}
+
+- (UIBezierPath *)accessibilityPath
+{
+    return [UIBezierPath bezierPathWithOvalInRect:self.frame];
 }
 
 - (void)setTintColor:(UIColor *)tintColor
