@@ -302,7 +302,14 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
         [self createGLView];
     }
 
+    // setup accessibility
+    //
+    self.isAccessibilityElement = YES;
     self.accessibilityLabel = @"Map";
+    self.accessibilityLabel = @"Map";
+    self.accessibilityLanguage = @"en";
+    self.accessibilityTraits = UIAccessibilityTraitAllowsDirectInteraction;
+    
     self.backgroundColor = [UIColor clearColor];
     self.clipsToBounds = YES;
 
@@ -1709,6 +1716,36 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
 - (void)emptyMemoryCache
 {
     _mbglMap->onLowMemory();
+}
+
+#pragma mark - Accessibility -
+
+- (NSString *)accessibilityValue
+{
+    CLLocationCoordinate2D centerCoordinate = self.centerCoordinate;
+    CLLocationDegrees latDeg = std::abs(centerCoordinate.latitude);
+    NSString *latDir = centerCoordinate.latitude > 0 ? @"north" : @"south";
+    CLLocationDegrees lonDeg = std::abs(centerCoordinate.longitude);
+    NSString *lonDir = centerCoordinate.longitude > 0 ? @"east" : @"west";
+    
+    if (self.zoomLevel > 8) {
+        // Each arcsecond is about 30 m, too small for even high zoom levels.
+        CLLocationDegrees latMin = round(fmod(latDeg, 1) * 60);
+        CLLocationDegrees lonMin = round(fmod(lonDeg, 1) * 60);
+        return [NSString stringWithFormat:
+                @"Centered on %i degree%@ %i minute%@ %@, and %i degree%@ %i minute%@ %@",
+                (int)latDeg, latDeg == 1 ? @"" : @"s",
+                (int)latMin, latMin == 1 ? @"" : @"s", latDir,
+                (int)lonDeg, lonDeg == 1 ? @"" : @"s",
+                (int)lonMin, lonMin == 1 ? @"" : @"s", lonDir];
+    } else {
+        // Each arcminute is about 1 nmi, too small for low zoom levels.
+        latDeg = round(latDeg);
+        lonDeg = round(lonDeg);
+        return [NSString stringWithFormat:@"Centered on %i degree%@ %@ and %i degree%@ %@",
+                (int)latDeg, latDeg == 1 ? @"" : @"s", latDir,
+                (int)lonDeg, lonDeg == 1 ? @"" : @"s", lonDir];
+    }
 }
 
 #pragma mark - Geography -
