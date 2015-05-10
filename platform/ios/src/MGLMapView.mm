@@ -133,6 +133,48 @@ mbgl::Color MGLColorObjectFromUIColor(UIColor *color)
     return {{ (float)r, (float)g, (float)b, (float)a }};
 }
 
+// Boxes the compass
+static NSString *MGLDescriptionForDirection(CLLocationDirection direction)
+{
+    NSArray *descriptions = @[
+        @"North",
+        @"North by east",
+        @"North-northeast",
+        @"Northeast by north",
+        @"Northeast",
+        @"Northeast by east",
+        @"East-northeast",
+        @"East by north",
+        @"East",
+        @"East by south",
+        @"East-southeast",
+        @"Southeast by east",
+        @"Southeast",
+        @"Southeast by south",
+        @"South-southeast",
+        @"South by east",
+        @"South",
+        @"South by west",
+        @"South-southwest",
+        @"Southwest by south",
+        @"Southwest",
+        @"Southwest by west",
+        @"West-southwest",
+        @"West by south",
+        @"West",
+        @"West by north",
+        @"West-northwest",
+        @"Northwest by west",
+        @"Northwest",
+        @"Northwest by north",
+        @"North-northwest",
+        @"North by west",
+    ];
+    
+    NSUInteger cardinalPoint = round(direction / 360 * 32);
+    return descriptions[cardinalPoint];
+}
+
 /// Lightweight container for metadata about an annotation, including the annotation itself.
 class MGLAnnotationContext {
 public:
@@ -304,7 +346,7 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
 
     // setup accessibility
     //
-    self.isAccessibilityElement = YES;
+//    self.isAccessibilityElement = YES;
     self.accessibilityLabel = @"Map";
     self.accessibilityLabel = @"Map";
     self.accessibilityLanguage = @"en";
@@ -362,7 +404,8 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
     // setup attribution
     //
     _attributionButton = [UIButton buttonWithType:UIButtonTypeInfoLight];
-    _attributionButton.accessibilityLabel = @"Attribution info";
+    _attributionButton.accessibilityLabel = @"About this map";
+    _attributionButton.accessibilityHint = @"Access credits, a feedback form, and more";
     [_attributionButton addTarget:self action:@selector(showAttribution) forControlEvents:UIControlEventTouchUpInside];
     _attributionButton.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_attributionButton];
@@ -371,12 +414,15 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
 
     // setup compass
     //
-    _compassView = [[UIImageView alloc] initWithImage:[MGLMapView resourceImageNamed:@"Compass.png"]];
-    _compassView.accessibilityLabel = @"Compass";
-    _compassView.frame = CGRectMake(0, 0, _compassView.image.size.width, _compassView.image.size.height);
+    UIImage *compassImage = [MGLMapView resourceImageNamed:@"Compass.png"];
+    _compassView = [[UIImageView alloc] initWithImage:compassImage];
+    _compassView.frame = CGRectMake(0, 0, compassImage.size.width, compassImage.size.height);
     _compassView.alpha = 0;
     _compassView.userInteractionEnabled = YES;
     [_compassView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleCompassTapGesture:)]];
+    _compassView.accessibilityTraits = UIAccessibilityTraitButton;
+    _compassView.accessibilityLabel = @"Compass";
+    _compassView.accessibilityHint = @"Rotates the map to face due north";
     UIView *container = [[UIView alloc] initWithFrame:CGRectZero];
     [container addSubview:_compassView];
     container.translatesAutoresizingMaskIntoConstraints = NO;
@@ -637,6 +683,7 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
                                  multiplier:1
                                    constant:5]];
 
+    UIImage *compassImage = self.compassView.image;
     [compassContainerConstraints addObject:
      [NSLayoutConstraint constraintWithItem:compassContainer
                                   attribute:NSLayoutAttributeWidth
@@ -644,7 +691,7 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
                                      toItem:nil
                                   attribute:NSLayoutAttributeNotAnAttribute
                                  multiplier:1
-                                   constant:self.compassView.image.size.width]];
+                                   constant:compassImage.size.width]];
 
     [compassContainerConstraints addObject:
      [NSLayoutConstraint constraintWithItem:compassContainer
@@ -653,7 +700,7 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
                                      toItem:nil
                                   attribute:NSLayoutAttributeNotAnAttribute
                                  multiplier:1
-                                   constant:self.compassView.image.size.height]];
+                                   constant:compassImage.size.height]];
     [constraintParentView addConstraints:compassContainerConstraints];
 
     // logo bug
@@ -3908,6 +3955,7 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
     CLLocationDirection degrees = mbgl::util::wrap(-self.direction, 0., 360.);
 
     self.compassView.transform = CGAffineTransformMakeRotation(MGLRadiansFromDegrees(degrees));
+    self.compassView.accessibilityValue = MGLDescriptionForDirection(degrees);
 
     if (_mbglMap->getBearing() && self.compassView.alpha < 1)
     {
