@@ -1720,6 +1720,23 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
 
 #pragma mark - Accessibility -
 
+- (CGRect)accessibilityFrame
+{
+    CGRect frame = [super accessibilityFrame];
+    UIViewController *viewController = self.viewControllerForLayoutGuides;
+    if (viewController)
+    {
+        UIView *compassContainer = self.compassView.superview;
+        CGFloat topInset = compassContainer.frame.origin.y + compassContainer.frame.size.height + 5;
+        frame.origin.y += topInset;
+        frame.size.height -= topInset;
+        
+        CGFloat bottomInset = MIN(self.logoView.frame.origin.y, self.attributionButton.frame.origin.y) - 8;
+        frame.size.height = bottomInset - frame.origin.y;
+    }
+    return frame;
+}
+
 - (NSString *)accessibilityValue
 {
     CLLocationCoordinate2D centerCoordinate = self.centerCoordinate;
