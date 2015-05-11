@@ -175,6 +175,16 @@ static NSString *MGLDescriptionForDirection(CLLocationDirection direction)
     return descriptions[cardinalPoint];
 }
 
+@interface MGLAnnotationAccessibilityElement : UIAccessibilityElement
+
+@property (nonatomic) MGLAnnotationTag tag;
+
+@end
+
+@implementation MGLAnnotationAccessibilityElement
+
+@end
+
 /// Lightweight container for metadata about an annotation, including the annotation itself.
 class MGLAnnotationContext {
 public:
@@ -182,6 +192,7 @@ public:
     /// mbgl-given identifier for the annotation image used by this annotation.
     /// Based on the annotation image’s reusable identifier.
     NSString *symbolIdentifier;
+    MGLAnnotationAccessibilityElement *accessibilityElement;
 };
 
 #pragma mark - Private -
@@ -1784,6 +1795,64 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
     return frame;
 }
 
+- (NSInteger)accessibilityElementCount
+{
+    std::vector<MGLAnnotationTag> visibleAnnotations = [self annotationTagsInRect:self.bounds];
+    return visibleAnnotations.size();
+}
+
+- (id)accessibilityElementAtIndex:(NSInteger)index
+{
+    NSAssert(index < MGLAnnotationTagNotFound, @"Too many accessibility elements to associate annotation tags with.");
+    MGLAnnotationTag annotationTag = (MGLAnnotationTag)index;
+    NSAssert(_annotationContextsByAnnotationTag.count(annotationTag), @"Can’t get accessibility element for nonexistent annotation.");
+    MGLAnnotationContext &annotationContext = _annotationContextsByAnnotationTag.at(_selectedAnnotationTag);
+    id <MGLAnnotation> annotation = annotationContext.annotation;
+    MGLAnnotationAccessibilityElement *element = annotationContext.accessibilityElement;
+    
+    // Lazily create an accessibility element for the found annotation.
+    if ( ! element)
+    {
+        element = [[MGLAnnotationAccessibilityElement alloc] initWithAccessibilityContainer:self];
+        element.tag = annotationTag;
+        element.accessibilityTraits = UIAccessibilityTraitButton;
+        if ([annotation respondsToSelector:@selector(title)])
+        {
+            element.accessibilityLabel = annotation.title;
+        }
+        if ([annotation respondsToSelector:@selector(subtitle)])
+        {
+            element.accessibilityValue = annotation.subtitle;
+        }
+        annotationContext.accessibilityElement = element;
+    }
+    
+    // Update the accessibility element’s frame.
+    CGPoint mapViewPoint = [self convertCoordinate:annotation.coordinate toPointToView:self];
+    CGRect mapViewRect = CGRectMake(mapViewPoint.x - 20, mapViewPoint.y - 30, 40, 60);
+    CGRect screenRect = UIAccessibilityConvertFrameToScreenCoordinates(mapViewRect, self);
+    element.accessibilityFrame = screenRect;
+    
+    return element;
+}
+
+- (NSInteger)indexOfAccessibilityElement:(id)element
+{
+    if (![element isKindOfClass:[MGLAnnotationAccessibilityElement class]])
+    {
+        return NSNotFound;
+    }
+    
+    for (auto &pair : _annotationContextsByAnnotationTag)
+    {
+        if (pair.second.accessibilityElement == element)
+        {
+            return pair.first;
+        }
+    }
+    return NSNotFound;
+}
+
 #pragma mark - Geography -
 
 + (NS_SET_OF(NSString *) *)keyPathsForValuesAffectingCenterCoordinate
@@ -2514,6 +2583,7 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
     }
     
     [self didChangeValueForKey:@"annotations"];
+    UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
 }
 
 - (double)alphaForShapeAnnotation:(MGLShape *)annotation
@@ -2626,6 +2696,7 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
         [self willChangeValueForKey:@"annotations"];
         _mbglMap->removeAnnotations(annotationTagsToRemove);
         [self didChangeValueForKey:@"annotations"];
+        UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
     }
 }
 
