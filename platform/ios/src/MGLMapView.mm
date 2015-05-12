@@ -1803,9 +1803,9 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
 
 - (id)accessibilityElementAtIndex:(NSInteger)index
 {
-    NSAssert(index < MGLAnnotationTagNotFound, @"Too many accessibility elements to associate annotation tags with.");
-    MGLAnnotationTag annotationTag = (MGLAnnotationTag)index;
-    NSAssert(_annotationContextsByAnnotationTag.count(annotationTag), @"Can’t get accessibility element for nonexistent annotation.");
+    MGLAnnotationTag annotationTag = [self visibleAnnotationTagAtIndex:index];
+    NSAssert(annotationTag != MGLAnnotationTagNotFound, @"Can’t get accessibility element for nonexistent annotation at index %li.", index);
+    NSAssert(_annotationContextsByAnnotationTag.count(annotationTag), @"Missing annotation for tag %u.", annotationTag);
     MGLAnnotationContext &annotationContext = _annotationContextsByAnnotationTag.at(_selectedAnnotationTag);
     id <MGLAnnotation> annotation = annotationContext.annotation;
     MGLAnnotationAccessibilityElement *element = annotationContext.accessibilityElement;
@@ -1828,12 +1828,19 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
     }
     
     // Update the accessibility element’s frame.
-    CGPoint mapViewPoint = [self convertCoordinate:annotation.coordinate toPointToView:self];
-    CGRect mapViewRect = CGRectMake(mapViewPoint.x - 20, mapViewPoint.y - 30, 40, 60);
-    CGRect screenRect = UIAccessibilityConvertFrameToScreenCoordinates(mapViewRect, self);
+    MGLAnnotationImage *annotationImage = [self imageOfAnnotationWithTag:annotationTag];
+    CGRect annotationFrame = [self frameOfImage:annotationImage.image centeredAtCoordinate:annotation.coordinate];
+    CGRect screenRect = UIAccessibilityConvertFrameToScreenCoordinates(annotationFrame, self);
     element.accessibilityFrame = screenRect;
     
     return element;
+}
+
+- (MGLAnnotationTag)visibleAnnotationTagAtIndex:(NSInteger)index
+{
+    std::vector<MGLAnnotationTag> visibleAnnotations = [self annotationTagsInRect:self.bounds];
+    std::sort(visibleAnnotations.begin(), visibleAnnotations.end());
+    return index >= 0 && (MGLAnnotationTag)index < visibleAnnotations.size() ? visibleAnnotations[index] : MGLAnnotationTagNotFound;
 }
 
 - (NSInteger)indexOfAccessibilityElement:(id)element
@@ -1843,14 +1850,12 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
         return NSNotFound;
     }
     
-    for (auto &pair : _annotationContextsByAnnotationTag)
-    {
-        if (pair.second.accessibilityElement == element)
-        {
-            return pair.first;
-        }
-    }
-    return NSNotFound;
+    std::vector<MGLAnnotationTag> visibleAnnotations = [self annotationTagsInRect:self.bounds];
+    std::sort(visibleAnnotations.begin(), visibleAnnotations.end());
+    auto foundElement = std::find(visibleAnnotations.begin(), visibleAnnotations.end(),
+                                  ((MGLAnnotationAccessibilityElement *)element).tag);
+    if (foundElement == visibleAnnotations.end()) return NSNotFound;
+    else return std::distance(visibleAnnotations.begin(), foundElement);
 }
 
 #pragma mark - Geography -
