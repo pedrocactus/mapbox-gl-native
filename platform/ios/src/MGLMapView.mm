@@ -1798,12 +1798,29 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
 - (NSInteger)accessibilityElementCount
 {
     std::vector<MGLAnnotationTag> visibleAnnotations = [self annotationTagsInRect:self.bounds];
-    return visibleAnnotations.size();
+    return visibleAnnotations.size() + 2 /* compass, attributionButton */;
 }
 
 - (id)accessibilityElementAtIndex:(NSInteger)index
 {
-    MGLAnnotationTag annotationTag = [self visibleAnnotationTagAtIndex:index];
+    std::vector<MGLAnnotationTag> visibleAnnotations = [self annotationTagsInRect:self.bounds];
+    
+    // Ornaments
+    if (index == 0)
+    {
+        return self.compassView;
+    }
+    if (index > 0 && (NSUInteger)index == visibleAnnotations.size() + 1 /* compass */)
+    {
+        return self.attributionButton;
+    }
+    
+    std::sort(visibleAnnotations.begin(), visibleAnnotations.end());
+    MGLAnnotationTag annotationTag = MGLAnnotationTagNotFound;
+    if (index >= 0 && (MGLAnnotationTag)index < visibleAnnotations.size())
+    {
+        annotationTag = visibleAnnotations[index];
+    }
     NSAssert(annotationTag != MGLAnnotationTagNotFound, @"Can’t get accessibility element for nonexistent annotation at index %li.", index);
     NSAssert(_annotationContextsByAnnotationTag.count(annotationTag), @"Missing annotation for tag %u.", annotationTag);
     MGLAnnotationContext &annotationContext = _annotationContextsByAnnotationTag.at(_selectedAnnotationTag);
@@ -1836,26 +1853,28 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
     return element;
 }
 
-- (MGLAnnotationTag)visibleAnnotationTagAtIndex:(NSInteger)index
-{
-    std::vector<MGLAnnotationTag> visibleAnnotations = [self annotationTagsInRect:self.bounds];
-    std::sort(visibleAnnotations.begin(), visibleAnnotations.end());
-    return index >= 0 && (MGLAnnotationTag)index < visibleAnnotations.size() ? visibleAnnotations[index] : MGLAnnotationTagNotFound;
-}
-
 - (NSInteger)indexOfAccessibilityElement:(id)element
 {
-    if (![element isKindOfClass:[MGLAnnotationAccessibilityElement class]])
+    if (element == self.compassView)
+    {
+        return 0;
+    }
+    if ( ! [element isKindOfClass:[MGLAnnotationAccessibilityElement class]] &&
+        element != self.attributionButton)
     {
         return NSNotFound;
     }
     
     std::vector<MGLAnnotationTag> visibleAnnotations = [self annotationTagsInRect:self.bounds];
+    if (element == self.attributionButton)
+    {
+        return visibleAnnotations.size();
+    }
     std::sort(visibleAnnotations.begin(), visibleAnnotations.end());
     auto foundElement = std::find(visibleAnnotations.begin(), visibleAnnotations.end(),
                                   ((MGLAnnotationAccessibilityElement *)element).tag);
     if (foundElement == visibleAnnotations.end()) return NSNotFound;
-    else return std::distance(visibleAnnotations.begin(), foundElement);
+    else return std::distance(visibleAnnotations.begin(), foundElement) + 1;
 }
 
 #pragma mark - Geography -
