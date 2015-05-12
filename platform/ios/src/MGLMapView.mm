@@ -1816,14 +1816,15 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
     }
     
     std::sort(visibleAnnotations.begin(), visibleAnnotations.end());
-    MGLAnnotationTag annotationTag = MGLAnnotationTagNotFound;
-    if (index >= 0 && (MGLAnnotationTag)index < visibleAnnotations.size())
+    NSUInteger annotationIndex = MGLAnnotationTagNotFound;
+    if (index >= 0 && (NSUInteger)index < visibleAnnotations.size())
     {
-        annotationTag = visibleAnnotations[index];
+        annotationIndex = index - 1 /* compass */;
     }
-    NSAssert(annotationTag != MGLAnnotationTagNotFound, @"Can’t get accessibility element for nonexistent annotation at index %li.", index);
+    MGLAnnotationTag annotationTag = visibleAnnotations[annotationIndex];
+    NSAssert(annotationTag != MGLAnnotationTagNotFound, @"Can’t get accessibility element for nonexistent or invisible annotation at index %li.", index);
     NSAssert(_annotationContextsByAnnotationTag.count(annotationTag), @"Missing annotation for tag %u.", annotationTag);
-    MGLAnnotationContext &annotationContext = _annotationContextsByAnnotationTag.at(_selectedAnnotationTag);
+    MGLAnnotationContext &annotationContext = _annotationContextsByAnnotationTag.at(annotationTag);
     id <MGLAnnotation> annotation = annotationContext.annotation;
     MGLAnnotationAccessibilityElement *element = annotationContext.accessibilityElement;
     
