@@ -1798,7 +1798,7 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
 - (NSInteger)accessibilityElementCount
 {
     std::vector<MGLAnnotationTag> visibleAnnotations = [self annotationTagsInRect:self.bounds];
-    return visibleAnnotations.size() + 2 /* compass, attributionButton */;
+    return visibleAnnotations.size() + 3 /* compass, userLocationAnnotationView, attributionButton */;
 }
 
 - (id)accessibilityElementAtIndex:(NSInteger)index
@@ -1810,7 +1810,11 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
     {
         return self.compassView;
     }
-    if (index > 0 && (NSUInteger)index == visibleAnnotations.size() + 1 /* compass */)
+    if (index == 1)
+    {
+        return self.userLocationAnnotationView;
+    }
+    if (index > 0 && (NSUInteger)index == visibleAnnotations.size() + 2 /* compass, userLocationAnnotationView */)
     {
         return self.attributionButton;
     }
@@ -1819,7 +1823,7 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
     NSUInteger annotationIndex = MGLAnnotationTagNotFound;
     if (index >= 0 && (NSUInteger)index < visibleAnnotations.size())
     {
-        annotationIndex = index - 1 /* compass */;
+        annotationIndex = index - 2 /* compass, userLocationAnnotationView */;
     }
     MGLAnnotationTag annotationTag = visibleAnnotations[annotationIndex];
     NSAssert(annotationTag != MGLAnnotationTagNotFound, @"Can’t get accessibility element for nonexistent or invisible annotation at index %li.", index);
@@ -1860,6 +1864,10 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
     {
         return 0;
     }
+    if (element == self.userLocationAnnotationView)
+    {
+        return 1;
+    }
     if ( ! [element isKindOfClass:[MGLAnnotationAccessibilityElement class]] &&
         element != self.attributionButton)
     {
@@ -1875,7 +1883,7 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
     auto foundElement = std::find(visibleAnnotations.begin(), visibleAnnotations.end(),
                                   ((MGLAnnotationAccessibilityElement *)element).tag);
     if (foundElement == visibleAnnotations.end()) return NSNotFound;
-    else return std::distance(visibleAnnotations.begin(), foundElement) + 1;
+    else return std::distance(visibleAnnotations.begin(), foundElement) + 2 /* compass, userLocationAnnotationView */;
 }
 
 #pragma mark - Geography -
@@ -3994,6 +4002,8 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
             [self deselectAnnotation:self.selectedAnnotation animated:YES];
         }
     }
+    
+    UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
 }
 
 /// Intended center point of the user location annotation view with respect to
