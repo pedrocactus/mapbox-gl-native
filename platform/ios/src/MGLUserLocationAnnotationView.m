@@ -53,6 +53,7 @@ const CGFloat MGLUserLocationAnnotationArrowSize = MGLUserLocationAnnotationPuck
         self.annotation = [[MGLUserLocation alloc] initWithMapView:mapView];
         _mapView = mapView;
         [self setupLayers];
+        self.isAccessibilityElement = YES;
         self.accessibilityTraits = UIAccessibilityTraitButton;
     }
     return self;
@@ -100,6 +101,11 @@ const CGFloat MGLUserLocationAnnotationArrowSize = MGLUserLocationAnnotationPuck
                 (int)latDeg, latDeg == 1 ? @"" : @"s", latDir,
                 (int)lonDeg, lonDeg == 1 ? @"" : @"s", lonDir];
     }
+}
+
+- (CGRect)accessibilityFrame
+{
+    return CGRectInset(self.frame, -15, -15);
 }
 
 - (UIBezierPath *)accessibilityPath
