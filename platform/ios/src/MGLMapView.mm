@@ -179,9 +179,21 @@ static NSString *MGLDescriptionForDirection(CLLocationDirection direction)
 
 @property (nonatomic) MGLAnnotationTag tag;
 
+- (instancetype)initWithAccessibilityContainer:(id)container tag:(MGLAnnotationTag)identifier NS_DESIGNATED_INITIALIZER;
+
 @end
 
 @implementation MGLAnnotationAccessibilityElement
+
+- (instancetype)initWithAccessibilityContainer:(id)container tag:(MGLAnnotationTag)tag
+{
+    if (self = [super initWithAccessibilityContainer:container])
+    {
+        _tag = tag;
+        self.accessibilityTraits = UIAccessibilityTraitButton;
+    }
+    return self;
+}
 
 @end
 
@@ -207,7 +219,7 @@ public:
     if (self = [super initWithAccessibilityContainer:container])
     {
         self.accessibilityTraits = UIAccessibilityTraitButton;
-        self.accessibilityLabel = self.accessibilityLabel;
+        self.accessibilityLabel = [self.accessibilityContainer accessibilityLabel];
         self.accessibilityHint = @"Returns to the map";
     }
     return self;
@@ -254,7 +266,7 @@ public:
 @property (nonatomic) CGFloat quickZoomStart;
 @property (nonatomic, getter=isDormant) BOOL dormant;
 @property (nonatomic, readonly, getter=isRotationAllowed) BOOL rotationAllowed;
-@property (nonatomic) UIAccessibilityElement *mapViewProxyAccessibilityElement;
+@property (nonatomic) MGLMapViewProxyAccessibilityElement *mapViewProxyAccessibilityElement;
 
 @end
 
@@ -1901,32 +1913,29 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
     NSAssert(_annotationContextsByAnnotationTag.count(annotationTag), @"Missing annotation for tag %u.", annotationTag);
     MGLAnnotationContext &annotationContext = _annotationContextsByAnnotationTag.at(annotationTag);
     id <MGLAnnotation> annotation = annotationContext.annotation;
-    MGLAnnotationAccessibilityElement *element = annotationContext.accessibilityElement;
     
     // Lazily create an accessibility element for the found annotation.
-    if ( ! element)
+    if ( ! annotationContext.accessibilityElement)
     {
-        element = [[MGLAnnotationAccessibilityElement alloc] initWithAccessibilityContainer:self];
-        element.tag = annotationTag;
-        element.accessibilityTraits = UIAccessibilityTraitButton;
-        if ([annotation respondsToSelector:@selector(title)])
-        {
-            element.accessibilityLabel = annotation.title;
-        }
-        if ([annotation respondsToSelector:@selector(subtitle)])
-        {
-            element.accessibilityValue = annotation.subtitle;
-        }
-        annotationContext.accessibilityElement = element;
+        annotationContext.accessibilityElement = [[MGLAnnotationAccessibilityElement alloc] initWithAccessibilityContainer:self tag:annotationTag];
     }
     
-    // Update the accessibility element’s frame.
+    // Update the accessibility element.
     MGLAnnotationImage *annotationImage = [self imageOfAnnotationWithTag:annotationTag];
     CGRect annotationFrame = [self frameOfImage:annotationImage.image centeredAtCoordinate:annotation.coordinate];
     CGRect screenRect = UIAccessibilityConvertFrameToScreenCoordinates(annotationFrame, self);
-    element.accessibilityFrame = screenRect;
+    annotationContext.accessibilityElement.accessibilityFrame = screenRect;
     
-    return element;
+    if ([annotation respondsToSelector:@selector(title)])
+    {
+        annotationContext.accessibilityElement.accessibilityLabel = annotation.title;
+    }
+    if ([annotation respondsToSelector:@selector(subtitle)])
+    {
+        annotationContext.accessibilityElement.accessibilityValue = annotation.subtitle;
+    }
+    
+    return annotationContext.accessibilityElement;
 }
 
 - (NSInteger)indexOfAccessibilityElement:(id)element
@@ -1962,11 +1971,11 @@ mbgl::Duration MGLDurationInSeconds(NSTimeInterval duration)
     else return std::distance(visibleAnnotations.begin(), foundElement) + 2 /* compass, userLocationAnnotationView */;
 }
 
-- (UIAccessibilityElement *)mapViewProxyAccessibilityElement
+- (MGLMapViewProxyAccessibilityElement *)mapViewProxyAccessibilityElement
 {
     if ( ! _mapViewProxyAccessibilityElement)
     {
-        _mapViewProxyAccessibilityElement = [[MGLAnnotationAccessibilityElement alloc] initWithAccessibilityContainer:self];
+        _mapViewProxyAccessibilityElement = [[MGLMapViewProxyAccessibilityElement alloc] initWithAccessibilityContainer:self];
     }
     return _mapViewProxyAccessibilityElement;
 }
