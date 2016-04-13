@@ -316,14 +316,14 @@ std::vector<TileCoordinate> pointsToCoordinates(const std::vector<ScreenCoordina
 }
 
 std::vector<std::string> MapContext::queryRenderedFeatures(const ScreenCoordinate& point, const optional<std::vector<std::string>>& layerIDs) {
-    auto queryGeometry = pointsToCoordinates({ point }, transformState);
-
     if (!style) return {};
+
+    auto queryGeometry = pointsToCoordinates({ point }, transformState);
     return style->queryRenderedFeatures(queryGeometry, transformState.getZoom(), transformState.getAngle(), layerIDs);
 }
 
-std::vector<std::string> MapContext::queryRenderedFeaturesBox(const std::vector<ScreenCoordinate>& box, const optional<std::vector<std::string>>& layerIDs) {
-    if (box.size() != 2) return {};
+std::vector<std::string> MapContext::queryRenderedFeaturesBox(const std::array<ScreenCoordinate, 2>& box, const optional<std::vector<std::string>>& layerIDs) {
+    if (!style) return {};
 
     std::vector<ScreenCoordinate> queryPoints {
         { box[0].x, box[0].y },
@@ -332,10 +332,8 @@ std::vector<std::string> MapContext::queryRenderedFeaturesBox(const std::vector<
         { box[0].x, box[1].y },
         { box[0].x, box[0].y }
     };
-
     auto queryGeometry = pointsToCoordinates(queryPoints, transformState);
 
-    if (!style) return {};
     return style->queryRenderedFeatures(queryGeometry, transformState.getZoom(), transformState.getAngle(), layerIDs);
 };
 

@@ -70,7 +70,7 @@ public:
     std::vector<std::string> getClasses() const;
 
     std::vector<std::string> queryRenderedFeatures(const ScreenCoordinate&, const optional<std::vector<std::string>>& layerIDs);
-    std::vector<std::string> queryRenderedFeaturesBox(const std::vector<ScreenCoordinate>&, const optional<std::vector<std::string>>& layerIDs);
+    std::vector<std::string> queryRenderedFeaturesBox(const std::array<ScreenCoordinate, 2>&, const optional<std::vector<std::string>>& layerIDs);
 
     void setSourceTileCacheSize(size_t size);
     void onLowMemory();

@@ -491,7 +491,7 @@ std::vector<std::string> Map::queryRenderedFeatures(const ScreenCoordinate& poin
     return context->invokeSync<std::vector<std::string>>(&MapContext::queryRenderedFeatures, point, layerIDs);
 }
 
-std::vector<std::string> Map::queryRenderedFeatures(const std::vector<ScreenCoordinate>& box, const optional<std::vector<std::string>>& layerIDs) {
+std::vector<std::string> Map::queryRenderedFeatures(const std::array<ScreenCoordinate, 2>& box, const optional<std::vector<std::string>>& layerIDs) {
     return context->invokeSync<std::vector<std::string>>(&MapContext::queryRenderedFeaturesBox, box, layerIDs);
 }
 
