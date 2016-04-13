@@ -85,14 +85,12 @@ public:
     virtual void redoPlacement(const std::function<void()>&) {}
 
     virtual void queryRenderedFeatures(
-            std::unordered_map<std::string, std::vector<std::string>>&,
-            const GeometryCollection&,
-            const double,
-            const double,
-            const double,
-            const optional<std::vector<std::string>>&) {
-        return;
-    }
+            std::unordered_map<std::string, std::vector<std::string>>& result,
+            const GeometryCollection& queryGeometry,
+            const double bearing,
+            const double tileSize,
+            const double scale,
+            const optional<std::vector<std::string>>& layerIDs);
 
     bool isReady() const {
         return isReadyState(state);
