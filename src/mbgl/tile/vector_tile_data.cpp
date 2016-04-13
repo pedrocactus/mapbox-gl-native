@@ -67,8 +67,8 @@ VectorTileData::VectorTileData(const TileID& id_,
             }
 
             std::exception_ptr error;
-            if (result.is<TileParseResultBuckets>()) {
-                auto& resultBuckets = result.get<TileParseResultBuckets>();
+            if (result.is<TileParseResultData>()) {
+                auto& resultBuckets = result.get<TileParseResultData>();
                 state = resultBuckets.state;
 
                 // Persist the configuration we just placed so that we can later check whether we need to
@@ -112,8 +112,8 @@ bool VectorTileData::parsePending(std::function<void(std::exception_ptr)> callba
         }
 
         std::exception_ptr error;
-        if (result.is<TileParseResultBuckets>()) {
-            auto& resultBuckets = result.get<TileParseResultBuckets>();
+        if (result.is<TileParseResultData>()) {
+            auto& resultBuckets = result.get<TileParseResultData>();
             state = resultBuckets.state;
 
             // Move over all buckets we received in this parse request, potentially overwriting
