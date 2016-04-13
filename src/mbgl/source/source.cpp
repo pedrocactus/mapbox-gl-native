@@ -523,26 +523,25 @@ std::unordered_map<std::string, std::vector<std::string>> Source::queryRenderedF
         auto tileSpaceBoundsMin = coordinateToTilePoint(tile.id, { minX, minY, z });
         auto tileSpaceBoundsMax = coordinateToTilePoint(tile.id, { maxX, maxY, z });
 
-        if (tileSpaceBoundsMin.x < util::EXTENT && tileSpaceBoundsMin.y < util::EXTENT &&
-            tileSpaceBoundsMax.x >= 0 && tileSpaceBoundsMax.y >= 0) {
+        if (tileSpaceBoundsMin.x >= util::EXTENT || tileSpaceBoundsMin.y >= util::EXTENT ||
+            tileSpaceBoundsMax.x < 0 || tileSpaceBoundsMax.y < 0) continue;
 
-            GeometryCoordinates tileSpaceQueryGeometry;
+        GeometryCoordinates tileSpaceQueryGeometry;
 
-            for (auto& c : queryGeometry) {
-                tileSpaceQueryGeometry.push_back(coordinateToTilePoint(tile.id, c));
-            }
+        for (auto& c : queryGeometry) {
+            tileSpaceQueryGeometry.push_back(coordinateToTilePoint(tile.id, c));
+        }
 
-            auto it = tileQueries.find(integerID);
-            if (it != tileQueries.end()) {
-                it->second.queryGeometry.push_back(std::move(tileSpaceQueryGeometry));
-            } else {
-                tileQueries.emplace(integerID, TileQuery{
-                        tilePtr,
-                        { tileSpaceQueryGeometry },
-                        util::tileSize * std::pow(2, tile.id.z - tile.id.sourceZ),
-                        std::pow(2, zoom - tile.id.z)
-                    });
-            }
+        auto it = tileQueries.find(integerID);
+        if (it != tileQueries.end()) {
+            it->second.queryGeometry.push_back(std::move(tileSpaceQueryGeometry));
+        } else {
+            tileQueries.emplace(integerID, TileQuery{
+                    tilePtr,
+                    { tileSpaceQueryGeometry },
+                    util::tileSize * std::pow(2, tile.id.z - tile.id.sourceZ),
+                    std::pow(2, zoom - tile.id.z)
+                });
         }
     }
 
