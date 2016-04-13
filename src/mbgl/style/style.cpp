@@ -342,6 +342,7 @@ std::vector<std::string> Style::queryRenderedFeatures(
     std::vector<std::string> features;
     auto featuresInserter = std::back_inserter(features);
 
+    // Combine all results based on the style layer order.
     for (auto& layerPtr : layers) {
         auto& layerID = layerPtr->id;
         for (auto& sourceResult : sourceResults) {
