@@ -665,10 +665,6 @@ public final class UserLocationView extends View {
         }
     }
 
-    public void setOnMyLocationChangeListener(@Nullable MapboxMap.OnMyLocationChangeListener listener) {
-        mOnMyLocationChangeListener = listener;
-    }
-
     // public for animator only
     public float getDirection() {
         if (mMyBearingTrackingMode == MyBearingTracking.COMPASS) {

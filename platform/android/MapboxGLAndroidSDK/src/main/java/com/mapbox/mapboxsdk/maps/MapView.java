@@ -78,6 +78,8 @@ import com.mapbox.mapboxsdk.exceptions.TelemetryServiceNotConfiguredException;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.layers.CustomLayer;
+import com.mapbox.mapboxsdk.location.LocationListener;
+import com.mapbox.mapboxsdk.location.LocationServices;
 import com.mapbox.mapboxsdk.maps.widgets.CompassView;
 import com.mapbox.mapboxsdk.maps.widgets.UserLocationView;
 import com.mapbox.mapboxsdk.telemetry.MapboxEvent;
@@ -2341,8 +2343,15 @@ public class MapView extends FrameLayout {
         return mUserLocationView.getLocation();
     }
 
-    void setOnMyLocationChangeListener(@Nullable MapboxMap.OnMyLocationChangeListener listener) {
-        mUserLocationView.setOnMyLocationChangeListener(listener);
+    void setOnMyLocationChangeListener(@Nullable final MapboxMap.OnMyLocationChangeListener listener) {
+        LocationServices.getLocationServices(getContext()).addLocationListener(new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                if(listener!=null){
+                    listener.onMyLocationChange(location);
+                }
+            }
+        });
     }
 
     void setMyLocationTrackingMode(@MyLocationTracking.Mode int myLocationTrackingMode) {
