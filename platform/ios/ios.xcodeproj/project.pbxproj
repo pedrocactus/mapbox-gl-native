@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		402A69181CC6D38000B67A95 /* MGLAnnotationView.h in Headers */ = {isa = PBXBuildFile; fileRef = 402A69161CC6D38000B67A95 /* MGLAnnotationView.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		402A69191CC6D38000B67A95 /* MGLAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 402A69171CC6D38000B67A95 /* MGLAnnotationView.m */; };
+		402A691A1CC6D38B00B67A95 /* MGLAnnotationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 402A69171CC6D38000B67A95 /* MGLAnnotationView.m */; };
+		402A691C1CC6D44F00B67A95 /* MGLAnnotationView.h in Headers */ = {isa = PBXBuildFile; fileRef = 402A69161CC6D38000B67A95 /* MGLAnnotationView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DA1DC96A1CB6C6B7006E619F /* MBXCustomCalloutView.m in Sources */ = {isa = PBXBuildFile; fileRef = DA1DC9671CB6C6B7006E619F /* MBXCustomCalloutView.m */; };
 		DA1DC96B1CB6C6B7006E619F /* MBXOfflinePacksTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DA1DC9691CB6C6B7006E619F /* MBXOfflinePacksTableViewController.m */; };
 		DA1DC9701CB6C6CE006E619F /* points.geojson in Resources */ = {isa = PBXBuildFile; fileRef = DA1DC96C1CB6C6CE006E619F /* points.geojson */; };
@@ -235,6 +239,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		402A69161CC6D38000B67A95 /* MGLAnnotationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGLAnnotationView.h; sourceTree = "<group>"; };
+		402A69171CC6D38000B67A95 /* MGLAnnotationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGLAnnotationView.m; sourceTree = "<group>"; };
 		DA1DC94A1CB6C1C2006E619F /* Mapbox GL.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Mapbox GL.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA1DC9501CB6C1C2006E619F /* MBXAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBXAppDelegate.h; sourceTree = "<group>"; };
 		DA1DC9531CB6C1C2006E619F /* MBXViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBXViewController.h; sourceTree = "<group>"; };
@@ -570,6 +576,8 @@
 		DA8848331CBAFB2A00AB86E3 /* Kit */ = {
 			isa = PBXGroup;
 			children = (
+				402A69161CC6D38000B67A95 /* MGLAnnotationView.h */,
+				402A69171CC6D38000B67A95 /* MGLAnnotationView.m */,
 				DA8848341CBAFB8500AB86E3 /* MGLAnnotationImage.h */,
 				DA8848401CBAFB9800AB86E3 /* MGLAnnotationImage_Private.h */,
 				DA8848411CBAFB9800AB86E3 /* MGLAnnotationImage.m */,
@@ -722,6 +730,7 @@
 				DA8848221CBAFA6200AB86E3 /* MGLOfflineRegion_Private.h in Headers */,
 				DA8847F91CBAFA5100AB86E3 /* MGLPolygon.h in Headers */,
 				DA8847F81CBAFA5100AB86E3 /* MGLPointAnnotation.h in Headers */,
+				402A69181CC6D38000B67A95 /* MGLAnnotationView.h in Headers */,
 				DA8847F31CBAFA5100AB86E3 /* MGLMultiPoint.h in Headers */,
 				DA88484F1CBAFB9800AB86E3 /* MGLAnnotationImage_Private.h in Headers */,
 				DA8847F21CBAFA5100AB86E3 /* MGLMapCamera.h in Headers */,
@@ -758,6 +767,7 @@
 				DABFB8651CBE99E500D62B32 /* MGLOverlay.h in Headers */,
 				DABFB8681CBE99E500D62B32 /* MGLPolyline.h in Headers */,
 				DABFB86F1CBE9A0F00D62B32 /* MGLMapView.h in Headers */,
+				402A691C1CC6D44F00B67A95 /* MGLAnnotationView.h in Headers */,
 				DABFB8631CBE99E500D62B32 /* MGLOfflineRegion.h in Headers */,
 				DABFB8731CBE9A9900D62B32 /* Mapbox.h in Headers */,
 				DABFB86B1CBE99E500D62B32 /* MGLTilePyramidOfflineRegion.h in Headers */,
@@ -1004,6 +1014,7 @@
 				DA8848901CBB048E00AB86E3 /* reachability.m in Sources */,
 				DA8848211CBAFA6200AB86E3 /* MGLOfflinePack.mm in Sources */,
 				DA8848591CBAFB9800AB86E3 /* MGLMapView.mm in Sources */,
+				402A69191CC6D38000B67A95 /* MGLAnnotationView.m in Sources */,
 				DA8848501CBAFB9800AB86E3 /* MGLAnnotationImage.m in Sources */,
 				DA8848281CBAFA6200AB86E3 /* MGLShape.m in Sources */,
 				DA8848321CBAFA6200AB86E3 /* NSString+MGLAdditions.m in Sources */,
@@ -1037,6 +1048,7 @@
 				DAA4E4251CBB730400178DFB /* MGLShape.m in Sources */,
 				DAA4E42B1CBB730400178DFB /* NSString+MGLAdditions.m in Sources */,
 				DAA4E4261CBB730400178DFB /* MGLStyle.mm in Sources */,
+				402A691A1CC6D38B00B67A95 /* MGLAnnotationView.m in Sources */,
 				DAA4E41D1CBB730400178DFB /* MGLGeometry.mm in Sources */,
 				DAA4E41F1CBB730400178DFB /* MGLMultiPoint.mm in Sources */,
 				DAA4E4281CBB730400178DFB /* MGLTypes.m in Sources */,

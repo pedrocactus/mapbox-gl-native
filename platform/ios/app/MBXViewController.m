@@ -558,7 +558,17 @@ static const CLLocationCoordinate2D WorldTourDestinations[] = {
 
 #pragma mark - MGLMapViewDelegate
 
-- (MGLAnnotationImage *)mapView:(MGLMapView * __nonnull)mapView imageForAnnotation:(id <MGLAnnotation> __nonnull)annotation
+- (MGLAnnotationView *)mapView:(MGLMapView *)mapView viewForAnnotation:(id<MGLAnnotation>)annotation
+{
+    MGLAnnotationView *annotationView = [[MGLAnnotationView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
+    annotationView.backgroundColor = [UIColor blueColor];
+    annotationView.layer.cornerRadius = 15;
+    annotationView.alpha = 0.5;
+    
+    return annotationView;
+}
+
+- (nullable MGLAnnotationImage *)mapView:(MGLMapView * __nonnull)mapView imageForAnnotation:(id <MGLAnnotation> __nonnull)annotation
 {
     if ([annotation.title isEqualToString:@"Dropped Marker"]
         || [annotation.title isEqualToString:kCustomCalloutTitle])
