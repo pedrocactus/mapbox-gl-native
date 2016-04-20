@@ -1,5 +1,7 @@
 #import "MGLStyle.h"
 
+#import "NSBundle+MGLAdditions.h"
+
 #import <mbgl/util/default_styles.hpp>
 
 #import <XCTest/XCTest.h>
@@ -41,7 +43,7 @@
     const unsigned numImplicitArgs = 2 /* _cmd, self */;
     unsigned numMethods = 0;
     Method *methods = class_copyMethodList(object_getClass([MGLStyle class]), &numMethods);
-    unsigned numVersionedStyleURLMethods = 0;
+    unsigned numVersionedMethods = 0;
     for (NSUInteger i = 0; i < numMethods; i++) {
         Method method = methods[i];
         SEL selector = method_getName(method);
@@ -51,14 +53,28 @@
             XCTAssertEqual(numArgs, numImplicitArgs, @"Unversioned style URL method should have no parameters, but it has %u.", numArgs - numImplicitArgs);
         } else if ([name hasSuffix:@"StyleURLWithVersion:"]) {
             XCTAssertEqual(numArgs, numImplicitArgs + 1, @"Versioned style URL method should have one parameter, but it has %u.", numArgs - numImplicitArgs);
-            numVersionedStyleURLMethods++;
+            numVersionedMethods++;
         } else {
             XCTAssertEqual([name rangeOfString:@"URL"].location, NSNotFound, @"MGLStyle style URL method %@ is malformed.", name);
         }
     }
-    XCTAssertEqual(mbgl::util::default_styles::numOrderedStyles, numVersionedStyleURLMethods,
+    XCTAssertEqual(mbgl::util::default_styles::numOrderedStyles, numVersionedMethods,
                    @"There are %lu default styles but MGLStyleTests only provides versioned style URL methods for %u of them.",
-                   mbgl::util::default_styles::numOrderedStyles, numVersionedStyleURLMethods);
+                   mbgl::util::default_styles::numOrderedStyles, numVersionedMethods);
+    
+    // Test that all the versioned style methods are in the public header.
+    NSURL *styleHeaderURL = [[[NSBundle mgl_frameworkBundle].bundleURL
+                              URLByAppendingPathComponent:@"Headers" isDirectory:YES]
+                             URLByAppendingPathComponent:@"MGLStyle.h"];
+    NSError *styleHeaderError;
+    NSString *styleHeader = [NSString stringWithContentsOfURL:styleHeaderURL usedEncoding:nil error:&styleHeaderError];
+    XCTAssertNil(styleHeaderError, @"Error getting contents of MGLStyle.h.");
+    
+    NSError *versionedMethodError;
+    NSRegularExpression *versionedMethodExpression = [NSRegularExpression regularExpressionWithPattern:@"^\\+\\s*\\(NSURL\\s*\\*\\s*\\)\\s*\\w+StyleURLWithVersion\\s*:\\s*\\(\\s*NSInteger\\s*\\)\\s*version\\s*;" options:NSRegularExpressionAnchorsMatchLines error:&versionedMethodError];
+    XCTAssertNil(versionedMethodError, @"Error compiling regular expression to search for versioned methods.");
+    NSUInteger numVersionedMethodDeclarations = [versionedMethodExpression numberOfMatchesInString:styleHeader options:0 range:NSMakeRange(0, styleHeader.length)];
+    XCTAssertEqual(numVersionedMethodDeclarations, numVersionedMethods);
 }
 
 @end
