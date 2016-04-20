@@ -71,7 +71,8 @@
     XCTAssertNil(styleHeaderError, @"Error getting contents of MGLStyle.h.");
     
     NSError *versionedMethodError;
-    NSRegularExpression *versionedMethodExpression = [NSRegularExpression regularExpressionWithPattern:@"^\\+\\s*\\(NSURL\\s*\\*\\s*\\)\\s*\\w+StyleURLWithVersion\\s*:\\s*\\(\\s*NSInteger\\s*\\)\\s*version\\s*;" options:NSRegularExpressionAnchorsMatchLines error:&versionedMethodError];
+    NSString *versionedMethodExpressionString = @(R"RE(^\+\s*\(NSURL\s*\*\s*\)\s*\w+StyleURLWithVersion\s*:\s*\(\s*NSInteger\s*\)\s*version\s*;)RE");
+    NSRegularExpression *versionedMethodExpression = [NSRegularExpression regularExpressionWithPattern:versionedMethodExpressionString options:NSRegularExpressionAnchorsMatchLines error:&versionedMethodError];
     XCTAssertNil(versionedMethodError, @"Error compiling regular expression to search for versioned methods.");
     NSUInteger numVersionedMethodDeclarations = [versionedMethodExpression numberOfMatchesInString:styleHeader options:0 range:NSMakeRange(0, styleHeader.length)];
     XCTAssertEqual(numVersionedMethodDeclarations, numVersionedMethods);
