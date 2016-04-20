@@ -32,6 +32,7 @@ import com.mapbox.mapboxsdk.constants.MyLocationTracking;
 import com.mapbox.mapboxsdk.constants.Style;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.layers.CustomLayer;
+import com.mapbox.mapboxsdk.maps.widgets.MyLocationViewSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,7 @@ public class MapboxMap {
     private MapView mMapView;
     private UiSettings mUiSettings;
     private TrackingSettings mTrackingSettings;
+    private MyLocationViewSettings myLocationViewSettings;
     private Projection mProjection;
     private CameraPosition mCameraPosition;
     private boolean mInvalidCameraPosition;
@@ -185,6 +187,20 @@ public class MapboxMap {
      */
     public TrackingSettings getTrackingSettings() {
         return mTrackingSettings;
+    }
+
+    //
+    // MyLocationViewSettings
+    //
+
+    /**
+     * Gets the settings of the user location for the map.
+     */
+    public MyLocationViewSettings getMyLocationViewSettings() {
+        if (myLocationViewSettings == null) {
+            myLocationViewSettings = new MyLocationViewSettings(mMapView);
+        }
+        return myLocationViewSettings;
     }
 
     //
@@ -695,7 +711,7 @@ public class MapboxMap {
         Polyline polyline;
         List<Polyline> polylines = new ArrayList<>(count);
 
-        if(count>0) {
+        if (count > 0) {
             for (PolylineOptions options : polylineOptionsList) {
                 polyline = options.getPolyline();
                 if (!polyline.getPoints().isEmpty()) {
@@ -759,7 +775,7 @@ public class MapboxMap {
 
         Polygon polygon;
         List<Polygon> polygons = new ArrayList<>(count);
-        if(count>0) {
+        if (count > 0) {
             for (PolygonOptions polygonOptions : polygonOptionsList) {
                 polygon = polygonOptions.getPolygon();
                 if (!polygon.getPoints().isEmpty()) {
@@ -770,7 +786,7 @@ public class MapboxMap {
             long[] ids = mMapView.addPolygons(polygons);
 
             // if unit tests or polygons correcly added to map
-            if(ids==null || ids.length==polygons.size()) {
+            if (ids == null || ids.length == polygons.size()) {
                 long id = 0;
                 for (int i = 0; i < polygons.size(); i++) {
                     polygon = polygons.get(i);
@@ -899,7 +915,7 @@ public class MapboxMap {
      * Removes all markers, polylines, polygons, overlays, etc from the map.
      */
     @UiThread
-    public void clear(){
+    public void clear() {
         removeAnnotations();
     }
 
@@ -1459,11 +1475,11 @@ public class MapboxMap {
         return mMapView;
     }
 
-    void setUiSettings(UiSettings uiSettings){
+    void setUiSettings(UiSettings uiSettings) {
         mUiSettings = uiSettings;
     }
 
-    void setProjection(Projection projection){
+    void setProjection(Projection projection) {
         mProjection = projection;
     }
 
