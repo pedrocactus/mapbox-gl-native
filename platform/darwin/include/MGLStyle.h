@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 static const NSInteger MGLStyleCurrentVersion = 9;
 
 /**
- A collection of convenience methods for creating style URLs of default styles provided by Mapbox. These instances of NSURL are cached.
+ A collection of convenience methods for creating style URLs of default styles provided by Mapbox.
  */
 @interface MGLStyle : NSObject
 
